@@ -1,23 +1,26 @@
-__version__ = '1.0.0'
-print('YouTubeDownloader ver:', __version__)
+__version__ = '1.1.0'
 import pytube
-print('pytube ver:', pytube.__version__)
-from kivy.app import App
-from kivy.core import text
-from kivy.uix.label import Label
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
-from kivy.uix.spinner import Spinner
 import datetime
+import os
+import platform
+
+import PyQt5.QtWidgets as qtw
+from PyQt5 import QtGui
+
+import sys
 
 import video_audio_downloader
+from video_downloader import download_video
 
-from kivy.core.window import Window
+def clear_console():
+    if platform.system() == 'Linux':
+        os.system('clear')
+    elif platform.system() == 'Windows':
+        os.system('cls')
 
-class AppGridLayout(GridLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+class MainWindow(qtw.QWidget):
+    def __init__(self) -> None:
+        super().__init__()
 
         self.you_tube_object = None
 
@@ -30,98 +33,67 @@ class AppGridLayout(GridLayout):
         self.rating = ''
         self.age_restricted = ''
 
-        self.resolution_type_var = '1080p'
-        self.audio_type_var = 'mp3'
+        self.setGeometry(0, 0, 750, 20)
+        self.setLayout(qtw.QGridLayout())
 
-        self.cols = 2
+        self.video_link_label = qtw.QLabel('Video link:')
+        self.layout().addWidget(self.video_link_label)
 
-        self.video_link_input = TextInput(multiline=False)
+        self.video_link_entry = qtw.QLineEdit()
+        self.layout().addWidget(self.video_link_entry, 0,1)
 
-        self.video_loading_status = Label(text="YouTube link not loaded")
-        self.video_link = Label(text="YouTube link")
-        self.video_audio_download_status = Label(text='Video/Audio not downloaded')
+        self.load_link_button = qtw.QPushButton('Load link', clicked = lambda: self.load_link())
+        self.layout().addWidget(self.load_link_button, 0,3)
 
-        self.statistic_title_name = Label(text='Video title')
-        self.statistic_title = Label(text=self.title)
-        self.statistic_author_name = Label(text='Video author')
-        self.statistic_author = Label(text=self.author)
-        self.statistic_length_name = Label(text='Video length: hh:mm:ss')
-        self.statistic_length = Label(text=self.length)
-        self.statistic_publish_date_name = Label(text='Video publish date: yyyy:mm:dd')
-        self.statistic_publish_date = Label(text=self.publish_date)
+        self.statistic_title_name = qtw.QLabel('Title:')
+        self.statistic_title = qtw.QLabel(self.title)
+        self.layout().addWidget(self.statistic_title_name , 2,0)
+        self.layout().addWidget(self.statistic_title, 2,1)
 
-        self.load_video_button = Button(text='Load YouTube link')
-        self.load_video_button.bind(on_press=self.load_video)
-        self.toFile = Button(text='Save statistics to file')
-        self.toFile.bind(on_press=self.save_statistics_to_file)
-        self.download_video_button = Button(text='Download video')
-        self.download_video_button.bind(on_press=self.download_video)
-        self.download_audio_button = Button(text='Download audio')
-        self.download_audio_button.bind(on_press=self.download_audio)
+        self.statistic_author_name = qtw.QLabel('Author:')
+        self.statistic_author = qtw.QLabel(self.title)
+        self.layout().addWidget(self.statistic_author_name , 3,0)
+        self.layout().addWidget(self.statistic_author, 3,1)
 
-        self.resolution_type = Spinner(
-            text='1080p',
-            values=('1080p', '720p', '480p', '360p', '240p', '144p')
-        )
-        self.resolution_type.bind(text=self.set_resolution)
-        self.audio_type = Spinner(
-            text='mp3',
-            values=('mp3','wav')
-        )
-        self.audio_type.bind(text=self.set_audio_type)
+        self.statistic_length_name = qtw.QLabel('Length:')
+        self.statistic_length = qtw.QLabel(self.title)
+        self.layout().addWidget(self.statistic_length_name , 4,0)
+        self.layout().addWidget(self.statistic_length, 4,1)
 
-        self.load_video_grid = GridLayout()
-        self.load_video_grid.cols = 2
-        self.load_video_grid.add_widget(self.video_link)
-        self.load_video_grid.add_widget(self.video_link_input)
+        self.statistic_publish_date_name = qtw.QLabel('Publish date:')
+        self.statistic_publish_date = qtw.QLabel(self.title)
+        self.layout().addWidget(self.statistic_publish_date_name , 5,0)
+        self.layout().addWidget(self.statistic_publish_date, 5,1)
 
-        self.video_loading_status_grid = GridLayout()
-        self.video_loading_status_grid.cols = 2
-        self.video_loading_status_grid.add_widget(self.video_loading_status)
-        self.video_loading_status_grid.add_widget(self.load_video_button)
+        self.resolution = qtw.QComboBox()
+        self.resolution.addItems(['1080p', '720p', '480p', '360p', '240p', '144p'])
+        self.layout().addWidget(self.resolution, 6,0)
 
-        self.video_audio_download_grid = GridLayout()
-        self.video_audio_download_grid.cols = 4
-        self.video_audio_download_grid.add_widget(self.download_video_button)
-        self.video_audio_download_grid.add_widget(self.resolution_type)
-        self.video_audio_download_grid.add_widget(self.download_audio_button)
-        self.video_audio_download_grid.add_widget(self.audio_type)
+        self.audio_type = qtw.QComboBox()
+        self.audio_type.addItems(['mp3', 'wav'])
+        self.layout().addWidget(self.audio_type, 7,0)
 
-        self.video_audio_download_status_grid = GridLayout()
-        self.video_audio_download_status_grid.cols = 1
-        self.video_audio_download_status_grid.add_widget(self.video_audio_download_status)
-        
-        self.left_grid = GridLayout()
-        self.left_grid.cols = 1
-        self.left_grid.add_widget(self.load_video_grid)
-        self.left_grid.add_widget(self.video_loading_status_grid)
-        self.left_grid.add_widget(self.video_audio_download_grid)
-        self.left_grid.add_widget(self.video_audio_download_status_grid)
-        
-        self.add_widget(self.left_grid)
+        self.download_type = qtw.QComboBox()
+        self.download_type.addItems(['Video', 'Audio'])
+        self.layout().addWidget(self.download_type, 8,0)
 
-        self.right_grid = GridLayout()
-        self.right_grid.cols = 1
-        self.right_grid.add_widget(self.toFile)
-        self.right_grid.add_widget(self.statistic_title_name)
-        self.right_grid.add_widget(self.statistic_title)
-        self.right_grid.add_widget(self.statistic_author_name)
-        self.right_grid.add_widget(self.statistic_author)
-        self.right_grid.add_widget(self.statistic_length_name)
-        self.right_grid.add_widget(self.statistic_length)
-        self.right_grid.add_widget(self.statistic_publish_date_name)
-        self.right_grid.add_widget(self.statistic_publish_date)
+        self.load_link_button = qtw.QPushButton('Download', clicked = lambda: self.download())
+        self.layout().addWidget(self.load_link_button, 9,0)
+        self.load_link_button = qtw.QPushButton('Save to file', clicked = lambda: self.save_statistics_to_file())
+        self.layout().addWidget(self.load_link_button, 10,0)
 
-        self.add_widget(self.right_grid)
+        self.video_audio_download_status = qtw.QLabel("Can't download: Video not loaded")
+        self.layout().addWidget(self.video_audio_download_status, 9,1)
 
+        self.statistics_status = qtw.QLabel("Can't save statistics: Video not loaded")
+        self.layout().addWidget(self.statistics_status, 10,1)
 
-    def load_video(self, instance):
-        if len(self.video_link_input.text) == 0:
+    def load_link(self):
+        if len(self.video_link_entry.text()) == 0:
             print('Add link to Video')
             return -1
 
-        self.video_loading_status.text='YouTube link loading'
-        you_tube_object_tmp = video_audio_downloader.load_file(self.video_link_input.text)
+        you_tube_object_tmp = video_audio_downloader.load_file(self.video_link_entry.text())
 
         if type(you_tube_object_tmp) == pytube.__main__.YouTube:
             print('link loaded')
@@ -136,13 +108,43 @@ class AppGridLayout(GridLayout):
             self.age_restricted = str(self.you_tube_object.age_restricted)
             self.show_statistics()
 
-            self.video_loading_status.text='YouTube link loaded'
+            self.video_audio_download_status.setText('Download available')
+            self.statistics_status.setText('Statistics save available')
 
         elif you_tube_object_tmp == -1:
-            self.video_loading_status.text='Wrong link'
             print('ERROR! Wrong link')
 
-    def save_statistics_to_file(self, instance):
+    def show_statistics(self):
+        self.statistic_title.setText(self.title)
+        self.statistic_author.setText(self.author)
+        self.statistic_length.setText(self.length)
+        self.statistic_publish_date.setText(self.publish_date)
+
+    def download(self):
+        if self.download_type.currentText() == 'Video': self.download_video()
+        else: self.download_audio()
+
+    def download_video(self):
+        if self.you_tube_object == None:
+            print('No video loaded!')
+            return -1
+
+        self.video_audio_download_status.setText('Downloading video in ' + self.resolution.currentText())
+        print('Downloading video in:', self.resolution.currentText())
+        video_audio_downloader.download_file(self.you_tube_object, 'video', self.resolution.currentText(), self.audio_type.currentText())
+        self.video_audio_download_status.setText('Video downloaded in ' + self.resolution.currentText())
+
+    def download_audio(self):
+        if self.you_tube_object == None:
+            print('No video loaded!')
+            return -1
+        
+        self.video_audio_download_status.setText('Downloading audio in ' + self.audio_type.currentText())
+        print('Downloading audio in:', self.audio_type.currentText())
+        video_audio_downloader.download_file(self.you_tube_object, 'audio', self.resolution.currentText(), self.audio_type.currentText())
+        self.video_audio_download_status.setText('Audio downloaded in ' + self.audio_type.currentText())
+
+    def save_statistics_to_file(self):
         if self.you_tube_object == None:
             print('No video loaded!')
             return -1
@@ -183,44 +185,13 @@ class AppGridLayout(GridLayout):
         file.write('\n')
       
         file.close()
-
-    def show_statistics(self):
-        self.statistic_title.text = self.title
-        self.statistic_author.text = self.author
-        self.statistic_length.text = self.length
-        self.statistic_publish_date.text = self.publish_date
-
-    def download_video(self, instance):
-        if self.you_tube_object == None:
-            print('No video loaded!')
-            return -1
-
-        self.video_audio_download_status.text = 'Downloading video in ' + self.resolution_type_var
-        print('Downloading video in:', self.resolution_type_var)
-        video_audio_downloader.download_file(self.you_tube_object, 'video', self.resolution_type_var, self.audio_type_var)
-        self.video_audio_download_status.text = 'Video downloaded in ' + self.resolution_type_var
-
-    def download_audio(self, instance):
-        if self.you_tube_object == None:
-            print('No video loaded!')
-            return -1
-
-        self.video_audio_download_status.text = 'Downloading audio in ' + self.audio_type_var
-        print('Downloading audio in:', self.audio_type_var)
-        video_audio_downloader.download_file(self.you_tube_object, 'audio', self.resolution_type_var, self.audio_type_var)
-        self.video_audio_download_status.text = 'Audio downloaded in ' + self.audio_type_var
-
-    def set_resolution(self, resolution_type, text):
-        self.resolution_type_var = text
-
-    def set_audio_type(self, audio_type, text):
-        self.audio_type_var = text
-
-class YouTubeDownloader(App):
-    Window.size = (1500, 800)
-    def build(self):
-        super().build()
-        return AppGridLayout()
+        self.statistics_status.setText('Statistics saved to file')
 
 if __name__ == '__main__':
-    YouTubeDownloader().run()
+    clear_console()
+    print('YouTubeDownloader ver:', __version__)
+    print('pytube ver:', pytube.__version__)
+    app = qtw.QApplication([])
+    main_window = MainWindow()
+    main_window.show()
+    app.exec_()

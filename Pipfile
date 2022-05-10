@@ -6,10 +6,9 @@ name = "pypi"
 [packages]
 pytube = "*"
 moviepy = "*"
-kivy = {extras = ["base"], version = "*"}
-kivy-examples = "*"
+pyqt5 = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.8"
