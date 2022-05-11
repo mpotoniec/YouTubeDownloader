@@ -5,12 +5,8 @@ import os
 import platform
 
 import PyQt5.QtWidgets as qtw
-from PyQt5 import QtGui
-
-import sys
 
 import video_audio_downloader
-from video_downloader import download_video
 
 def clear_console():
     if platform.system() == 'Linux':
@@ -148,14 +144,8 @@ class MainWindow(qtw.QWidget):
         if self.you_tube_object == None:
             print('No video loaded!')
             return -1
-
-        if platform.system() == 'Linux':
-            file = open('Statistics/'+self.title+'.txt','w')
-
-        elif platform.system() == 'Windows':
-            file = open('Statistics\\'+self.title+'.txt','w')
-
-        else: return -1
+        
+        file = open('Statistics/'+self.title+'.txt','w')
 
         file.write('Title:\n')
         file.write(self.title)
