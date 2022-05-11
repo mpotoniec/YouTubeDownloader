@@ -5,12 +5,8 @@ import os
 import platform
 
 import PyQt5.QtWidgets as qtw
-from PyQt5 import QtGui
-
-import sys
 
 import video_audio_downloader
-from video_downloader import download_video
 
 def clear_console():
     if platform.system() == 'Linux':
