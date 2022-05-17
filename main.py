@@ -20,6 +20,9 @@ class MainWindow(qtw.QWidget):
 
         self.you_tube_object = None
 
+        self.resolutions = ['1080p', '720p', '480p', '360p', '240p', '144p']
+        self.audio_types = ['mp3', 'wav', 'ogg']
+
         self.title = ''
         self.author = ''
         self.description = ''
@@ -62,11 +65,11 @@ class MainWindow(qtw.QWidget):
         self.layout().addWidget(self.statistic_publish_date, 5,1)
 
         self.resolution = qtw.QComboBox()
-        self.resolution.addItems(['1080p', '720p', '480p', '360p', '240p', '144p'])
+        self.resolution.addItems(self.resolutions)
         self.layout().addWidget(self.resolution, 6,0)
 
         self.audio_type = qtw.QComboBox()
-        self.audio_type.addItems(['mp3', 'wav'])
+        self.audio_type.addItems(self.audio_types)
         self.layout().addWidget(self.audio_type, 7,0)
 
         self.download_type = qtw.QComboBox()
@@ -191,3 +194,4 @@ if __name__ == '__main__':
     main_window = MainWindow()
     main_window.show()
     app.exec_()
+    clear_console()
