@@ -15,9 +15,9 @@ def load_file(link):
     else: return you_tube_object
 
 
-def download_file(you_tube_object, object_type, res, codec):
-    if object_type == 'video': video_downloader.download_video(you_tube_object, res)
-    elif object_type == 'audio': audio_downloader.download_audio(you_tube_object, codec, False)
+def download_file(you_tube_object, download_path, object_type, res, codec):
+    if object_type == 'video': video_downloader.download_video(you_tube_object, download_path, res)
+    elif object_type == 'audio': audio_downloader.download_audio(you_tube_object, download_path, codec, False)
     return 0
 
 #moviepy

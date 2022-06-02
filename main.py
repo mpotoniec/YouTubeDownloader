@@ -1,4 +1,4 @@
-__version__ = '1.1.0'
+__version__ = '2.1.0'
 import pytube
 import datetime
 import os
@@ -23,6 +23,8 @@ class MainWindow(qtw.QWidget):
         self.resolutions = ['1080p', '720p', '480p', '360p', '240p', '144p']
         self.audio_types = ['mp3', 'wav', 'ogg']
 
+        self.download_path = 'Downloads/'
+
         self.title = ''
         self.author = ''
         self.description = ''
@@ -43,6 +45,9 @@ class MainWindow(qtw.QWidget):
 
         self.load_link_button = qtw.QPushButton('Load link', clicked = lambda: self.load_link())
         self.layout().addWidget(self.load_link_button, 0,3)
+
+        self.choose_download_folder = qtw.QPushButton('Download folder', clicked = lambda: self.select_download_folder())
+        self.layout().addWidget(self.choose_download_folder, 1,3)
 
         self.statistic_title_name = qtw.QLabel('Title:')
         self.statistic_title = qtw.QLabel(self.title)
@@ -87,6 +92,10 @@ class MainWindow(qtw.QWidget):
         self.statistics_status = qtw.QLabel("Can't save statistics: Video not loaded")
         self.layout().addWidget(self.statistics_status, 10,1)
 
+    def select_download_folder(self):
+        self.download_path = qtw.QFileDialog.getExistingDirectory(self, 'Select floder to download') + '/'
+        if self.download_path == '/': self.download_path = 'Downloads/'
+
     def load_link(self):
         if len(self.video_link_entry.text()) == 0:
             print('Add link to Video')
@@ -129,8 +138,8 @@ class MainWindow(qtw.QWidget):
             return -1
 
         self.video_audio_download_status.setText('Downloading video in ' + self.resolution.currentText())
-        print('Downloading video in:', self.resolution.currentText())
-        video_audio_downloader.download_file(self.you_tube_object, 'video', self.resolution.currentText(), self.audio_type.currentText())
+        print('Downloading video in:', self.resolution.currentText(), ' to path: ', self.download_path)
+        video_audio_downloader.download_file(self.you_tube_object, self.download_path, 'video', self.resolution.currentText(), self.audio_type.currentText())
         self.video_audio_download_status.setText('Video downloaded in ' + self.resolution.currentText())
 
     def download_audio(self):
@@ -139,8 +148,8 @@ class MainWindow(qtw.QWidget):
             return -1
         
         self.video_audio_download_status.setText('Downloading audio in ' + self.audio_type.currentText())
-        print('Downloading audio in:', self.audio_type.currentText())
-        video_audio_downloader.download_file(self.you_tube_object, 'audio', self.resolution.currentText(), self.audio_type.currentText())
+        print('Downloading audio in:', self.audio_type.currentText(), ' to path: ', self.download_path)
+        video_audio_downloader.download_file(self.you_tube_object, self.download_path, 'audio', self.resolution.currentText(), self.audio_type.currentText())
         self.video_audio_download_status.setText('Audio downloaded in ' + self.audio_type.currentText())
 
     def save_statistics_to_file(self):
