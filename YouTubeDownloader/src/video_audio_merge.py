@@ -1,9 +1,10 @@
 import moviepy.editor as mp
 import os
 
-def merge_video_audio(video_name, audio_name):
+def merge_video_audio(video_name, audio_name, download_path):
     output_name = video_name.split('VideoOperationsFile/Video/')
-    output_name = output_name[0] + 'Downloads/' + output_name[1]
+    #output_name = output_name[0] + download_path + output_name[1]
+    output_name = download_path + output_name[1]
 
     video_file = mp.VideoFileClip(video_name)
     audio_file = mp.AudioFileClip(audio_name)
